@@ -1,5 +1,13 @@
+import { cn } from "@/lib/utils";
+
 const Page = () => {
-  return <div className="">Hello world</div>;
+  const something = true;
+
+  return (
+    <div className={cn("text-red-500", something && "text-purple-500")}>
+      Hello world
+    </div>
+  );
 };
 
 export default Page;
