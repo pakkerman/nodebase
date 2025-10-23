@@ -15,6 +15,8 @@ import {
   EntityHeader,
   EntityPagination,
   EntitySearch,
+  ErrorView,
+  LoadingView,
 } from "@/components/entity-components";
 
 export const WorkflowsSearch = () => {
@@ -103,4 +105,12 @@ export const WorkflowsContainer = ({
       {children}
     </EntityContainer>
   );
+};
+
+export const WorkflowsLoading = () => {
+  return <LoadingView message="Loading Workflows..." />;
+};
+
+export const WorkflowsError = () => {
+  return <ErrorView message="Error Loading Workflows" />;
 };
