@@ -94,6 +94,7 @@ export const EntitySearch = ({
       <SearchIcon className="size-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
       <Input
         placeholder={placeholder}
+        aria-label={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="max-w-[200px] bg-background shadow-none border-border pl-8"
@@ -116,7 +117,7 @@ export const EntityPagination = ({
   disabled,
 }: EntityPaginationProps) => {
   return (
-    <div className="flex items-center justify-between, gap-x-2 w-full">
+    <div className="flex items-center justify-between gap-x-2 w-full">
       <div className="flex-1 text-sm text-muted-foreground">
         Page {page} of {totalPages || 1}
       </div>
