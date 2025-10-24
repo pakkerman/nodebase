@@ -20,6 +20,7 @@ import "@xyflow/react/dist/style.css";
 import { useSuspenseWorkflow } from "@/features/workflows/hooks/use-workflows";
 
 import { ErrorView, LoadingView } from "@/components/entity-components";
+import { nodeComponents } from "@/config/node-components";
 
 export const EditorLoading = () => {
   return <LoadingView message="Loading Editor..." />;
@@ -61,6 +62,7 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        nodeTypes={nodeComponents}
         onConnect={onConnect}
       >
         <Background />
