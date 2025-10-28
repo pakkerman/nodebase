@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { memo, type ReactNode } from "react";
-import { type NodeProps, Position } from "@xyflow/react";
+import { type NodeProps, Position, useReactFlow } from "@xyflow/react";
 
 import type { LucideIcon } from "lucide-react";
 import { BaseNode, BaseNodeContent } from "@/components/react-flow/base-node";
@@ -29,8 +29,20 @@ export const BaseTriggerNode = memo(
     onSettings,
     onDoubleClick,
   }: BaseTriggerNodeProps) => {
+    const { setNodes, setEdges } = useReactFlow();
+
     const handleDelete = () => {
-      // TODO: implement function
+      setNodes((currNodes) => {
+        const updatedNodes = currNodes.filter((node) => node.id !== id);
+        return updatedNodes;
+      });
+
+      setEdges((currEdges) => {
+        const updatedEdges = currEdges.filter(
+          (edge) => edge.source !== id && edge.target !== id,
+        );
+        return updatedEdges;
+      });
     };
 
     return (
