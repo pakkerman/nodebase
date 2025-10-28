@@ -71,6 +71,11 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
         nodeTypes={nodeComponents}
         onInit={setEditor}
         onConnect={onConnect}
+        snapToGrid
+        snapGrid={[10, 10]}
+        panOnScroll
+        panOnDrag={false}
+        selectionOnDrag
       >
         <Background />
         <Controls />
