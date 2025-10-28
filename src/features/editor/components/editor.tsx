@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useSetAtom } from "jotai";
 import {
   ReactFlow,
   applyNodeChanges,
@@ -19,9 +20,10 @@ import {
 import "@xyflow/react/dist/style.css";
 
 import { useSuspenseWorkflow } from "@/features/workflows/hooks/use-workflows";
+import { editorAtom } from "../store/atoms";
+import { nodeComponents } from "@/config/node-components";
 
 import { ErrorView, LoadingView } from "@/components/entity-components";
-import { nodeComponents } from "@/config/node-components";
 import { AddNodeButton } from "./add-node-button";
 
 export const EditorLoading = () => {
@@ -34,6 +36,8 @@ export const EditorError = () => {
 
 export const Editor = ({ workflowId }: { workflowId: string }) => {
   const { data: workflow } = useSuspenseWorkflow(workflowId);
+
+  const setEditor = useSetAtom(editorAtom);
 
   const [nodes, setNodes] = useState<Node[]>(workflow.nodes);
   const [edges, setEdges] = useState<Edge[]>(workflow.edges);
@@ -65,7 +69,13 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeComponents}
+        onInit={setEditor}
         onConnect={onConnect}
+        snapToGrid
+        snapGrid={[10, 10]}
+        panOnScroll
+        panOnDrag={false}
+        selectionOnDrag
       >
         <Background />
         <Controls />
