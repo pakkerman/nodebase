@@ -3,9 +3,9 @@ import { NonRetriableError } from "inngest";
 import ky, { type Options as KyOptions } from "ky";
 
 type HttpRequestData = {
-  variableName?: string;
-  endpoint?: string;
-  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  variableName: string;
+  endpoint: string;
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: string;
 };
 
@@ -29,9 +29,14 @@ export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
     );
   }
 
+  if (!data.method) {
+    // TODO: publish "error" state for http request
+    throw new NonRetriableError("HTTP Request node: must provide method");
+  }
+
   const result = await step.run("http-request", async () => {
-    const endpoint = data.endpoint!;
-    const method = data.method || "GET";
+    const endpoint = data.endpoint;
+    const method = data.method;
 
     const options: KyOptions = { method };
 
@@ -57,17 +62,9 @@ export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
       },
     };
 
-    if (data.variableName) {
-      return {
-        ...context,
-        [data.variableName]: responsePayload,
-      };
-    }
-
-    // Fallback to direct httpResponse for backwards compatibility
     return {
       ...context,
-      ...responsePayload,
+      [data.variableName]: responsePayload,
     };
   });
 
