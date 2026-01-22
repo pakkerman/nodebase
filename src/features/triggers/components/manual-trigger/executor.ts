@@ -1,0 +1,16 @@
+import type { NodeExecutor } from "@/features/executions/components/types";
+
+type ManualTriggerData = Record<string, unknown>;
+export const manualTriggerExecutor: NodeExecutor<ManualTriggerData> = async ({
+  nodeId,
+  context,
+  step,
+}) => {
+  // TODO: publish "Loading" state for manual trigger
+
+  const result = await step.run("manual-trigger", async () => context);
+
+  // TODO: publish 'success' state for manual trigger
+
+  return result;
+};
