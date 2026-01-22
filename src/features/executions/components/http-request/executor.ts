@@ -3,6 +3,7 @@ import { NonRetriableError } from "inngest";
 import ky, { type Options as KyOptions } from "ky";
 
 import type { NodeExecutor } from "@/features/executions/components/types";
+import { httpRequestChannel } from "@/inngest/channels/http-request";
 
 Handlebars.registerHelper("json", (context) => {
   const jsonString = JSON.stringify(context, null, 2);
@@ -22,23 +23,44 @@ export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
   nodeId,
   context,
   step,
+  publish,
 }) => {
-  // TODO: publish "Loading" state for http request
+  await publish(
+    httpRequestChannel().status({
+      nodeId,
+      status: "loading",
+    }),
+  );
 
   if (!data.endpoint) {
-    // TODO: publish "error" state for http request
+    await publish(
+      httpRequestChannel().status({
+        nodeId,
+        status: "error",
+      }),
+    );
     throw new NonRetriableError("HTTP Request node: must provide endpoint ");
   }
 
   if (!data.variableName) {
-    // TODO: publish "error" state for http request
+    await publish(
+      httpRequestChannel().status({
+        nodeId,
+        status: "error",
+      }),
+    );
     throw new NonRetriableError(
       "HTTP Request node: must provide variable name",
     );
   }
 
   if (!data.method) {
-    // TODO: publish "error" state for http request
+    await publish(
+      httpRequestChannel().status({
+        nodeId,
+        status: "error",
+      }),
+    );
     throw new NonRetriableError("HTTP Request node: must provide method");
   }
 
@@ -78,7 +100,12 @@ export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
     };
   });
 
-  // TODO: publish 'success' state for http request
+  await publish(
+    httpRequestChannel().status({
+      nodeId,
+      status: "success",
+    }),
+  );
 
   return result;
 };
