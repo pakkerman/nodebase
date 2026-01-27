@@ -4,11 +4,14 @@ import { NodeType } from "@/generated/prisma";
 import prisma from "@/lib/db";
 import { inngest } from "./client";
 import { topologicalSort } from "./utils";
-import { getExecutor } from "@/features/executions/components/lib/executor-registry";
+import { getExecutor } from "@/features/executions/lib/executor-registry";
 import { httpRequestChannel } from "./channels/http-request";
 
 export const executeWorkflow = inngest.createFunction(
-  { id: "execute-workflow" },
+  {
+    id: "execute-workflow",
+    retries: 0, // TODO: REMOVE FOR PRODUCTION
+  },
   {
     event: "workflow/execute.workflow",
     channels: [httpRequestChannel()],
