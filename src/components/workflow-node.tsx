@@ -11,7 +11,7 @@ interface WorkflowNodeProps {
   onDelete?: () => void;
   onSettings?: () => void;
   name?: string;
-  description?: string;
+  description?: string | ReactNode;
 }
 
 export function WorkflowNode({
