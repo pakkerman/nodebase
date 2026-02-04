@@ -1,10 +1,10 @@
-import Handlebars from "handlebars";
-import { createOpenAI } from "@ai-sdk/openai";
+import { NonRetriableError } from "inngest";
 import { generateText } from "ai";
+import { createAnthropic } from "@ai-sdk/anthropic";
+import Handlebars from "handlebars";
 
 import type { NodeExecutor } from "@/features/executions/types";
-import { openAiChannel } from "@/inngest/channels/openai";
-import { NonRetriableError } from "inngest";
+import { anthropicChannel } from "@/inngest/channels/anthropic";
 
 Handlebars.registerHelper("json", (context) => {
   const jsonString = JSON.stringify(context, null, 2);
@@ -12,13 +12,13 @@ Handlebars.registerHelper("json", (context) => {
   return safeString;
 });
 
-type OpenAiData = {
+type AnthropicData = {
   variableName?: string;
   systemPrompt?: string;
   userPrompt?: string;
 };
 
-export const openAiExecutor: NodeExecutor<OpenAiData> = async ({
+export const anthropicExecutor: NodeExecutor<AnthropicData> = async ({
   data,
   nodeId,
   context,
@@ -26,7 +26,7 @@ export const openAiExecutor: NodeExecutor<OpenAiData> = async ({
   publish,
 }) => {
   await publish(
-    openAiChannel().status({
+    anthropicChannel().status({
       nodeId,
       status: "loading",
     }),
@@ -34,22 +34,22 @@ export const openAiExecutor: NodeExecutor<OpenAiData> = async ({
 
   if (!data.variableName) {
     await publish(
-      openAiChannel().status({
+      anthropicChannel().status({
         nodeId,
         status: "error",
       }),
     );
-    throw new NonRetriableError("OpenAi node: Variable name is missing");
+    throw new NonRetriableError("Anthropic node: Variable name is missing");
   }
 
   if (!data.userPrompt) {
     await publish(
-      openAiChannel().status({
+      anthropicChannel().status({
         nodeId,
         status: "error",
       }),
     );
-    throw new NonRetriableError("OpenAi node: User prompt name is missing");
+    throw new NonRetriableError("Anthropic node: User prompt name is missing");
   }
 
   //TODO: if credential is missing
@@ -62,29 +62,33 @@ export const openAiExecutor: NodeExecutor<OpenAiData> = async ({
 
   // TODO: Fetch credential that user provided
 
-  const credential = process.env.OPENAI_API_KEY!;
+  const credential = process.env.ANTHORPIC_API_KEY!;
 
-  const openai = createOpenAI({
+  const anthropic = createAnthropic({
     apiKey: credential,
   });
 
   try {
-    const { steps } = await step.ai.wrap("openai-generate-text", generateText, {
-      model: openai("gpt-4"),
-      system: systemPrompt,
-      prompt: userPrompt,
-      experimental_telemetry: {
-        isEnabled: true,
-        recordInputs: true,
-        recordOutputs: true,
+    const { steps } = await step.ai.wrap(
+      "anthropic-generate-text",
+      generateText,
+      {
+        model: anthropic("claude-3-5-haiku-latest"),
+        system: systemPrompt,
+        prompt: userPrompt,
+        experimental_telemetry: {
+          isEnabled: true,
+          recordInputs: true,
+          recordOutputs: true,
+        },
       },
-    });
+    );
 
     const text =
       steps[0].content[0].type === "text" ? steps[0].content[0].text : "";
 
     await publish(
-      openAiChannel().status({
+      anthropicChannel().status({
         nodeId,
         status: "success",
       }),
@@ -98,7 +102,7 @@ export const openAiExecutor: NodeExecutor<OpenAiData> = async ({
     };
   } catch (error) {
     await publish(
-      openAiChannel().status({
+      anthropicChannel().status({
         nodeId,
         status: "error",
       }),
