@@ -1,10 +1,11 @@
 import Handlebars from "handlebars";
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateText } from "ai";
+import { NonRetriableError } from "inngest";
 
+import prisma from "@/lib/db";
 import type { NodeExecutor } from "@/features/executions/types";
 import { openAiChannel } from "@/inngest/channels/openai";
-import { NonRetriableError } from "inngest";
 
 Handlebars.registerHelper("json", (context) => {
   const jsonString = JSON.stringify(context, null, 2);
@@ -14,6 +15,7 @@ Handlebars.registerHelper("json", (context) => {
 
 type OpenAiData = {
   variableName?: string;
+  credentialId?: string;
   systemPrompt?: string;
   userPrompt?: string;
 };
@@ -42,6 +44,17 @@ export const openAiExecutor: NodeExecutor<OpenAiData> = async ({
     throw new NonRetriableError("OpenAi node: Variable name is missing");
   }
 
+  if (!data.credentialId) {
+    await publish(
+      openAiChannel().status({
+        nodeId,
+        status: "error",
+      }),
+    );
+
+    throw new NonRetriableError("OpenAI node: Credential is required");
+  }
+
   if (!data.userPrompt) {
     await publish(
       openAiChannel().status({
@@ -52,20 +65,26 @@ export const openAiExecutor: NodeExecutor<OpenAiData> = async ({
     throw new NonRetriableError("OpenAi node: User prompt name is missing");
   }
 
-  //TODO: if credential is missing
-
   const systemPrompt = data.systemPrompt
     ? Handlebars.compile(data.systemPrompt)(context)
     : "You are a helpful assistant";
 
   const userPrompt = Handlebars.compile(data.userPrompt)(context);
 
-  // TODO: Fetch credential that user provided
+  const credential = await step.run("get-credential", () => {
+    return prisma.credential.findUnique({
+      where: {
+        id: data.credentialId,
+      },
+    });
+  });
 
-  const credential = process.env.OPENAI_API_KEY!;
+  if (!credential) {
+    throw new NonRetriableError("OpenAI node: Credential not found");
+  }
 
   const openai = createOpenAI({
-    apiKey: credential,
+    apiKey: credential.value,
   });
 
   try {
