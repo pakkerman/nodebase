@@ -12,6 +12,7 @@ import { GeminiFormValues, GeminiDialog } from "./dialog";
 
 type GeminiNodeData = {
   varableName?: string;
+  credentialId?: string;
   model?: string;
   systemPrompt?: string;
   userPrompt?: string;

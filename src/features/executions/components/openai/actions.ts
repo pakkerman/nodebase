@@ -1,8 +1,8 @@
 "use server";
 
 import { inngest } from "@/inngest/client";
-import { getSubscriptionToken, type Realtime } from "@inngest/realtime";
 import { openAiChannel } from "@/inngest/channels/openai";
+import { getSubscriptionToken, type Realtime } from "@inngest/realtime";
 
 export type OpenAiToken = Realtime.Token<typeof openAiChannel, ["status"]>;
 
